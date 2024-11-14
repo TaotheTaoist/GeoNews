@@ -38,7 +38,7 @@ struct googlemapApp: App {
         // Attempt a simple Firestore read operation to confirm connection
         let db = Firestore.firestore()
         
-        db.collection("test").getDocuments { (querySnapshot, error) in
+        db.collection("Night Market").getDocuments { (querySnapshot, error) in
             if let error = error {
                 print("Error connecting to Firebase: \(error.localizedDescription)")
             } else if let documents = querySnapshot?.documents, !documents.isEmpty {

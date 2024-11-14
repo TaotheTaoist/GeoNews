@@ -147,13 +147,20 @@ struct EventSelectionView: View {
                     .padding()
                 }
             }
-            .navigationBarTitle("Select Event Type")
+            .navigationBarTitle("選擇事件")
         }
     }
 }
 
 // NightMarketEventEditView with inherited fields from Event
 struct NightMarketEventEditView: View {
+    let numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 6 // You can set this based on your precision needs
+        formatter.maximumFractionDigits = 6
+        return formatter
+    }()
     
     // Night Market-specific properties
     @State private var name: String = ""
@@ -165,7 +172,7 @@ struct NightMarketEventEditView: View {
     // Event superclass properties
     @State private var happenedAt: Date = Date()
     @State private var lastingTime: TimeInterval = 0
-    @State private var location: CLLocationCoordinate2D = CLLocationCoordinate2D()
+    @Binding var location: CLLocationCoordinate2D
     @State private var dangerousLevel: Int = 1
     @State private var funLevel: Int = 0
     @State private var temp: Double = 0.0
@@ -184,14 +191,15 @@ struct NightMarketEventEditView: View {
     @State private var parkingAvailable: Bool = true
     @State private var isSoldOut: Bool = false
    
-    
+    @Binding var selectedEventType: String? 
     var body: some View {
         Form {
             // Event superclass fields
             DatePicker("Event Date", selection: $happenedAt)
-            TextField("Duration (seconds)", value: $lastingTime, formatter: NumberFormatter())
-            TextField("Latitude", value: $location.latitude, formatter: NumberFormatter())
-            TextField("Longitude", value: $location.longitude, formatter: NumberFormatter())
+            TextField("Duration (seconds)", value: $lastingTime, formatter: numberFormatter)
+            TextField("Latitude", value: $location.latitude, formatter: numberFormatter)
+            TextField("Longitude", value: $location.longitude, formatter: numberFormatter)
+                       
             VStack(alignment: .leading) {
                            Text("Dangerous Level: \(dangerousLevel)")
                            Slider(value: Binding(
@@ -259,9 +267,12 @@ struct NightMarketEventEditView: View {
             "isSoldOut": isSoldOut,
             
         ]
-        
+        guard let eventType = selectedEventType else {
+               print("Event type is not selected")
+               return
+           }
         // Organize as UID -> EventType -> EventData
-        db.collection("NightMarket").addDocument(data: eventData) { error in
+        db.collection(eventType).addDocument(data: eventData)  { error in
             if let error = error {
                 print("Error saving event: \(error.localizedDescription)")
             } else {

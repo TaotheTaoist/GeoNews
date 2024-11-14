@@ -10,10 +10,11 @@ struct ContentView: View {
     @State private var markerCoordinate: CLLocationCoordinate2D? = nil
     @State private var isPlacingMarkerEnabled = false
     @State private var isButtonTapped = false
-   
+    
     @State private var isSheetPresented = false
-    @State private var selectedEventType: String? = nil  // Add selected event type state
-    @State private var eventDescription: String = "" // Add event description state
+    @State private var selectedEventType: String? = nil
+    @State private var eventDescription: String = ""
+    @StateObject private var eventViewModel = EventViewModel()
     
     var body: some View {
         
@@ -23,7 +24,8 @@ struct ContentView: View {
                 ZStack {
                     
                     MapView(region: $region, markerCoordinate: $markerCoordinate , isPlacingMarkerEnabled: $isPlacingMarkerEnabled,
-                            isSheetPresented: $isSheetPresented )
+                            isSheetPresented: $isSheetPresented,
+                            eventViewModel: eventViewModel )
                     
                     VStack {
                         Spacer()
@@ -58,12 +60,15 @@ struct ContentView: View {
                         
                         // Show event selection view
                         if selectedEventType == nil {
-                                                   EventSelectionView(selectedEventType: $selectedEventType)
-                                               } else {
-                                                   // Automatically redirect when an event type is selected
-                                                   NightMarketEventEditView()
-                                               }
-                                                  
+                            EventSelectionView(selectedEventType: $selectedEventType)
+                        } else {
+                            // Automatically redirect when an event type is selected
+                            NightMarketEventEditView(location: Binding(
+                                get: { markerCoordinate ?? CLLocationCoordinate2D(latitude: 0, longitude: 0) }, // Provide default value
+                                set: { markerCoordinate = $0 }
+                            ), selectedEventType: $selectedEventType)
+                        }
+                        
                         
                         Button("Dismiss") {
                             selectedEventType = ""
@@ -90,15 +95,19 @@ struct ContentView: View {
 }
 
 struct MapView: View {
-    @StateObject private var locationManager = LocationManager() // Location manager for handling location
-    @Binding var region: MKCoordinateRegion // This will hold the current region
-    @Binding var markerCoordinate: CLLocationCoordinate2D? // Binding to the marker's coordinate
+    
+    @State private var coordinatesWithId: [(coordinate: CLLocationCoordinate2D, id: String)] = []
 
+    @StateObject private var locationManager = LocationManager()
+    @Binding var region: MKCoordinateRegion
+    @Binding var markerCoordinate: CLLocationCoordinate2D?
+    
     @State private var cameraPosition: MapCameraPosition = .userLocation(fallback: .automatic)
-    @State private var hoverCoordinates: CLLocationCoordinate2D? = nil
+//    @State private var hoverCoordinates: CLLocationCoordinate2D? = nil
     
     @Binding var isPlacingMarkerEnabled: Bool
     @Binding var isSheetPresented: Bool
+    @ObservedObject var eventViewModel: EventViewModel
 
     var body: some View {
         ZStack {
@@ -107,18 +116,36 @@ struct MapView: View {
                     // Show user's location
                     UserAnnotation()
                     
-                    // If there's a marker coordinate, show the marker
-                    if let coordinate = markerCoordinate {
-                        Marker(coordinate: coordinate) {
-                            Image(systemName: "pin.circle.fill") // Custom annotation icon
-                                .foregroundColor(.red)  // Set the color of the marker
-                                .font(.title)
-                        }
-                    }
+//                    ForEach(eventViewModel.coordinates, id: \.self) { coordinate in
+//                        Marker(coordinate: coordinate) {
+//                            // Any additional actions for the marker
+//                        }
+//                    }
+                    ForEach(coordinatesWithId, id: \.id) { location in
+                                   Marker(coordinate: location.coordinate) {
+                                       Text(location.id)  // You can display the ID, or any other info from the location
+                                   }
+                               }
+
+
+
                 }
                 .onAppear {
                     locationManager.requestWhenInUseAuthorization()
                     locationManager.startUpdatingLocation()
+//                    eventViewModel.fetchEvents()
+//                    eventViewModel.fetchEventsForMap() { events in
+//                                   eventViewModel.events = events
+//                               }
+//                    eventViewModel.fetchEventCoordinates { coordinates in
+//                                   eventViewModel.coordinates = coordinates
+//                        print("Fetched coordinates: \(coordinates)")
+//                               }
+                    eventViewModel.fetchEventCoordinates { data in
+                                   self.coordinatesWithId = data
+                        print(data)
+                               }
+                    
                 }
                 .onTapGesture { position in
                     if isPlacingMarkerEnabled, let coordinate = proxy.convert(position, from: .local) {
