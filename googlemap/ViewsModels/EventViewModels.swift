@@ -74,67 +74,70 @@ import MapKit
 class EventViewModel: ObservableObject {
     @Published var events: [Event] = []
     @Published var coordinates: [CLLocationCoordinate2D] = []
+    
+    @Published  var isButtonTapped = false
     private var db = Firestore.firestore()
+    
     
 //    func fetch
 
-    func fetchEventsForMap(completion: @escaping ([Event]) -> Void) {
-        // Fetch all documents under the "Night Market" collection
-        db.collection("Night Market") // Your collection name
-            .getDocuments { (querySnapshot, error) in
-                if let error = error {
-                    print("Error fetching events: \(error.localizedDescription)")
-                    completion([])
-                    return
-                }
-
-                guard let querySnapshot = querySnapshot else {
-                    completion([])
-                    return
-                }
-
-                // Print the number of documents fetched
-                print("Documents fetched: \(querySnapshot.documents.count)")
-
-                // Loop through the documents and print each one
-                for document in querySnapshot.documents {
-                    // Print the Document ID
-                    print("Document ID: \(document.documentID)")
-                    
-                    // Print the document's data as a dictionary
-                    print("Document Data: \(document.data())")
-                }
-
-                // Map Firestore documents to Event model
-                let events = querySnapshot.documents.compactMap { document in
-                    let data = document.data()
-
-                    // Assuming latitude and longitude are available
-                    if let latitude = data["latitude"] as? Double, let longitude = data["longitude"] as? Double {
-                        let location = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-                        
-                        return Event(
-                            happenedAt: data["happenedAt"] as? Date ?? Date(),
-                            lastingTime: data["lastingTime"] as? TimeInterval ?? 0,
-                            location: location,
-                            dangerousLevel: data["dangerousLevel"] as? Int ?? 0,
-                            funLevel: data["funLevel"] as? Int ?? 0,
-                            temp: data["temp"] as? Double ?? 0,
-                            radius: data["radius"] as? Double ?? 0,
-                            url: data["url"] as? String ?? "",
-                            type: data["name"] as? String ?? ""
-                        )
-                    }
-                    return nil
-                }
-
-                // Update the events array with fetched data
-                DispatchQueue.main.async {
-                    self.events = events
-                    completion(events) // Call the completion handler with the fetched events
-                }
-            }
-    }
+//    func fetchEventsForMap(completion: @escaping ([Event]) -> Void) {
+//        // Fetch all documents under the "Night Market" collection
+//        db.collection("Night Market") // Your collection name
+//            .getDocuments { (querySnapshot, error) in
+//                if let error = error {
+//                    print("Error fetching events: \(error.localizedDescription)")
+//                    completion([])
+//                    return
+//                }
+//
+//                guard let querySnapshot = querySnapshot else {
+//                    completion([])
+//                    return
+//                }
+//
+//                // Print the number of documents fetched
+//                print("Documents fetched: \(querySnapshot.documents.count)")
+//
+//                // Loop through the documents and print each one
+//                for document in querySnapshot.documents {
+//                    // Print the Document ID
+//                    print("Document ID: \(document.documentID)")
+//                    
+//                    // Print the document's data as a dictionary
+//                    print("Document Data: \(document.data())")
+//                }
+//
+//                // Map Firestore documents to Event model
+//                let events = querySnapshot.documents.compactMap { document in
+//                    let data = document.data()
+//
+//                    // Assuming latitude and longitude are available
+//                    if let latitude = data["latitude"] as? Double, let longitude = data["longitude"] as? Double {
+//                        let location = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+//                        
+//                        return Event(
+//                            happenedAt: data["happenedAt"] as? Date ?? Date(),
+//                            lastingTime: data["lastingTime"] as? TimeInterval ?? 0,
+//                            location: location,
+//                            dangerousLevel: data["dangerousLevel"] as? Int ?? 0,
+//                            funLevel: data["funLevel"] as? Int ?? 0,
+//                            temp: data["temp"] as? Double ?? 0,
+//                            radius: data["radius"] as? Double ?? 0,
+//                            url: data["url"] as? String ?? "",
+//                            type: data["name"] as? String ?? ""
+//                        )
+//                    }
+//                    return nil
+//                }
+//
+//                // Update the events array with fetched data
+//                DispatchQueue.main.async {
+//                    self.events = events
+//                    completion(events) // Call the completion handler with the fetched events
+//                }
+//            }
+//    }
     func fetchEventCoordinates(completion: @escaping ([(coordinate: CLLocationCoordinate2D, id: String)]) -> Void) {
         // Fetch all documents under the "Night Market" collection
         db.collection("Night Market") // Your collection name
@@ -173,7 +176,32 @@ class EventViewModel: ObservableObject {
                 }
             }
     }
-
+    @Published var savedMarker: (coordinate: CLLocationCoordinate2D, id: String)?
+      
+      // Method to save the marker to your database
+      func saveMarker(marker: (coordinate: CLLocationCoordinate2D, id: String)) {
+          // Save the marker to your database
+          // After saving, update the savedMarker property
+          self.savedMarker = marker
+          
+          // Optionally, also fetch updated marker data from the server/database
+          fetchEventCoordinates { data in
+              // Update the markers with the new data (including the newly saved one)
+              self.savedMarker = data.last // If you want to store the latest marker
+          }
+      }
+      
+//      func fetchEventCoordinates(completion: @escaping ([(coordinate: CLLocationCoordinate2D, id: String)]) -> Void) {
+//          // Fetch the coordinates from your database or API
+//          // Call completion with the data
+//          
+//          let fetchedData: [(coordinate: CLLocationCoordinate2D, id: String)] = [
+//              // Simulated fetched data
+//              (coordinate: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194), id: "1")
+//          ]
+//          
+//          completion(fetchedData)
+//      }
 //    func fetchEventCoordinates(completion: @escaping ([CLLocationCoordinate2D]) -> Void) {
 //        // Fetch all documents under the "Night Market" collection
 //        db.collection("Night Market") // Your collection name

@@ -25,6 +25,7 @@
 		286EAD052CE6645D00917173 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 286EAD042CE6645D00917173 /* FirebaseCore */; };
 		286EAD072CE6645D00917173 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 286EAD062CE6645D00917173 /* FirebaseFirestore */; };
 		286EAD092CE6645D00917173 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 286EAD082CE6645D00917173 /* FirebaseStorage */; };
+		286EAD122CE7738100917173 /* MarkerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286EAD112CE7737800917173 /* MarkerDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,6 +65,7 @@
 		286EACE92CE61C7900917173 /* googlemap.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = googlemap.entitlements; sourceTree = "<group>"; };
 		286EACEA2CE61C7900917173 /* googlemapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = googlemapApp.swift; sourceTree = "<group>"; };
 		286EACEB2CE61C7900917173 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		286EAD112CE7737800917173 /* MarkerDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkerDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -152,6 +154,7 @@
 		286EACE52CE61C7900917173 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				286EAD112CE7737800917173 /* MarkerDetailView.swift */,
 				286EACE22CE61C7900917173 /* ContentView.swift */,
 				286EACE32CE61C7900917173 /* EventTypeForm.swift */,
 				286EACE42CE61C7900917173 /* MapView.swift */,
@@ -333,6 +336,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				286EACED2CE61C7900917173 /* earthquakeEvent.swift in Sources */,
+				286EAD122CE7738100917173 /* MarkerDetailView.swift in Sources */,
 				286EACEE2CE61C7900917173 /* events.swift in Sources */,
 				286EACEF2CE61C7900917173 /* nightMarketEvents.swift in Sources */,
 				286EACF02CE61C7900917173 /* partyEvent.swift in Sources */,
